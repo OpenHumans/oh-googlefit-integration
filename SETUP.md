@@ -1,4 +1,4 @@
-# Setting up your development environment for this Fitbit to Open Humans data transfer app
+# Setting up your development environment for this Google Fit to Open Humans data transfer app
 
 > Work through this guide to get this application running on your own machine
 
@@ -18,14 +18,10 @@
 
 [Click the link](https://devcenter.heroku.com/articles/heroku-cli#download-and-install) and choose an installer to download
 
-*Install [RabbitMQ](http://www.rabbitmq.com):*
+*Install [Redis](for the celery backend):*
 
-`$ brew install rabbitmq`
-`$ brew services start rabbitmq`
-
-To set it running on very popular Ubuntu and other Debian based systems, it will likely be started for you after you install the package, but can also start it manually with:
-
-`$ sudo rabbitmq-server start`.
+Can either install it and start it up manually or run it via docker via:
+```docker run --name some-redis -p 6379:6379 -d redis```
 
 *This app runs on [Python 3](https://www.python.org/downloads/).*
 
