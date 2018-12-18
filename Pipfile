@@ -1,0 +1,34 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+arrow = "*"
+celery = "*"
+dj-database-url = "*"
+django = "*"
+gunicorn = "*"
+"psycopg2" = "*"
+requests = "*"
+whitenoise = "*"
+python-social-auth = "*"
+raven = "*"
+vcrpy = "*"
+pyyaml = "*"
+redis = "*"
+iptools = "*"
+pyjq = "*"
+open-humans-api = "*"
+django-open-humans = "*"
+google-api-python-client = "*"
+google-auth = "*"
+google-auth-oauthlib = "*"
+google-auth-httplib2 = "*"
+
+[dev-packages]
+pylint = "*"
+"flake8" = "*"
+
+[requires]
+python_version = "3.6"
