@@ -10,7 +10,6 @@ have the @shared_task decorator.
 from __future__ import absolute_import
 
 import os
-import requests
 
 from celery import Celery
 from celery.schedules import crontab
