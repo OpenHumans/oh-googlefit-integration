@@ -29,6 +29,7 @@ def create_metadata():
             'Google Fit data.',
         'tags': ['Google Fit', 'GoogleFit', 'activity', 'steps', 'calories', 'distance'],
         'updated_at': str(datetime.utcnow()),
+        'month': '',
     }
 
 
@@ -67,21 +68,4 @@ def replace_googlefit(openhumansmember, googlefit_data):
     deleter = api.delete_file(openhumansmember.access_token,
                     openhumansmember.oh_id,
                     file_basename="googlefit-data.json")
-    print("delete response")
-    print(deleter)
-    print("trying to write to file")
-    with open(out_file, 'w') as json_file:
-        print("inside open file")
-        # json.dump(googlefit_data, json_file)
-        json_file.write(json.dumps(googlefit_data))
-        # print(json.dump(googlefit_data, json_file))
-        print("dumped, trying to flush")
-        json_file.flush()
-    print("attempting add response")
-    addr = api.upload_aws(out_file, metadata,
-                   openhumansmember.access_token,
-                   project_member_id=openhumansmember.oh_id)
-    print("add response")
-    print(addr)
-    logger.debug('uploaded new file for {}'.format(openhumansmember.oh_id))
 

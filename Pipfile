@@ -29,6 +29,7 @@ google-auth-httplib2 = "*"
 [dev-packages]
 pylint = "*"
 "flake8" = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.6"
