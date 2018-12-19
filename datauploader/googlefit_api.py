@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 import json
@@ -37,6 +38,7 @@ def end_of_day(dt):
     return dt.replace(hour=23, minute=59, second=59, microsecond=999999)
 
 
+# TODO: need to retry those
 def query_data_sources(access_token):
     headers = {"Content-Type": "application/json;encoding=utf-8",
                "Authorization": "Bearer {}".format(access_token)}
@@ -44,7 +46,7 @@ def query_data_sources(access_token):
     return set([(res['dataSource'][i]['dataType']['name'], res['dataSource'][i]['dataStreamId']) for i in range(len(res['dataSource']))])
 
 
-
+# TODO: need to retry those!
 def query_data_stream(access_token, aggregate_value, start_dt, end_dt, bucketing=HOURLY, aggregate_name="dataSourceId"):
 
     data = {
@@ -110,7 +112,8 @@ def generate_monthly_ranges(first_date, last_date):
 
 def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
-    user_has_data, fn = False, None #get_existing_googlefit_file(oh_access_token) # also get the latest month file
+
+    user_has_data, fn = get_latest_googlefit_file(oh_access_token)
 
     if user_has_data:
         last_monthly_gf_data = GoogleFitData.from_file(fn)
@@ -137,11 +140,10 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
         monthly_data_json = monthly_gf_data.to_json()
         print("Last dt: {}".format(monthly_gf_data.end_dt))
-        file_name = 'googlefit_{}.json'.format(dt1.strftime('%Y%m%d'))
+        file_name = 'googlefit_{}.json'.format(dt1.strftime('%Y-%m'))
         full_file_name = write_jsonfile_to_tmp_dir(file_name, monthly_data_json)
-        all_gf_data_files.append(full_file_name)
+        all_gf_data_files.append((full_file_name, dt1.strftime("%Y-m")))
 
-        # metadata, replace considerations, ohapi
 
     print(all_gf_data_files)
 
@@ -158,18 +160,27 @@ def write_jsonfile_to_tmp_dir(filename, json_data):
     return full_path
 
 
-def get_existing_googlefit_file(oh_access_token):
-    member = api.exchange_oauth2_member(oh_access_token)
-    for dfile in member['data']:
-        if 'GoogleFit' in dfile['metadata']['tags']:
+def get_latest_googlefit_file(oh_access_token):
+    download_url = get_latest_googlefit_file_url(oh_access_token)
+    if download_url:
             tf_in = tempfile.NamedTemporaryFile(suffix='.json')
-            tf_in.write(requests.get(dfile['download_url']).content)
+            tf_in.write(requests.get(download_url).content)
             tf_in.flush()
             return True, tf_in.name
     return False, None
 
 
+def get_latest_googlefit_file_url(oh_access_token):
+    member = api.exchange_oauth2_member(oh_access_token)
+    latest_month = GOOGLEFIT_DEFAULT_START_DATE.strftime("%Y-%m")
+    download_url = None
+    for dfile in member['data']:
+        if 'GoogleFit' in dfile['metadata']['tags']:
+            if dfile['metadata'].get('month', '') > latest_month:
+                latest_month = dfile['metadata']['month']
+                download_url = dfile['download_url']
 
+    return download_url
 
 
 class GoogleFitData(object):
@@ -202,7 +213,7 @@ class GoogleFitData(object):
             data_types_synced.add(data_type_name)
             data_sources_synced.add((data_type_name, data_stream_id))
 
-        metadata = {'month': start_dt.strftime("%Y-%m"), 'last_dt': start_dt.strftime("%Y-%m-%d %H:%M:%S"),
+        metadata = {'month': start_dt.strftime("%Y-%m"), 'last_dt': end_dt.strftime("%Y-%m-%d %H:%M:%S"),
                     'data_source_pairs': list(data_sources_synced), 'data_types': list(data_types_synced)}
         return GoogleFitData(datasets, metadata)
 

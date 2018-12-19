@@ -1,5 +1,5 @@
+from datetime import datetime, timedelta
 import logging
-import requests
 import arrow
 
 from django.contrib import messages
@@ -8,10 +8,10 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from django.urls import reverse
 from datauploader.tasks import fetch_googlefit_data
+from datauploader.googlefit_api import get_latest_googlefit_file_url
 from ohapi import api
 from openhumans.models import OpenHumansMember
 from .models import GoogleFitMember
-from .helpers import get_googlefit_file, can_update_data
 import google_auth_oauthlib.flow
 
 
@@ -33,10 +33,17 @@ def index(request):
 
 
 def dashboard(request):
+
+    def can_update_data(googlefit_member):
+        if not googlefit_member.last_submitted_for_update or googlefit_member.last_submitted_for_update < (
+            arrow.now() - timedelta(hours=1)):
+            return True
+        return False
+
     if request.user.is_authenticated:
         if hasattr(request.user.openhumansmember, 'googlefit_member'):
             googlefit_member = request.user.openhumansmember.googlefit_member
-            download_file = get_googlefit_file(request.user.openhumansmember)
+            download_file = get_latest_googlefit_file_url(request.user.openhumansmember.get_access_token())
             if download_file == 'error':
                 logout(request)
                 return redirect("/")
