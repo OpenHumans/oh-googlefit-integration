@@ -11,6 +11,8 @@ from celery import shared_task
 
 from openhumans.models import OpenHumansMember
 from datetime import datetime
+import os
+
 from ohapi import api
 
 from .googlefit_api import get_googlefit_data
@@ -41,12 +43,25 @@ def fetch_googlefit_data(oh_id):
     oh_access_token = oh_member.get_access_token()
     gf_access_token = gf_member.get_access_token()
 
+    basenames_to_ids = get_existing_basenames_to_ids(oh_member)
+
     filesmonth = get_googlefit_data(oh_access_token, gf_access_token, current_dt)
     for fn, month in filesmonth:
-        #TODO: replace if already exists :-)
         api.upload_aws(fn, create_metadata(month),
                               oh_access_token,
                               project_member_id=oh_id)
+        basename = os.path.basename(fn)
+        if basename in basenames_to_ids:
+            file_id_to_delete = basenames_to_ids[basename]
+            api.delete_file(oh_access_token, file_id=file_id_to_delete)
 
     gf_member.last_updated = arrow.now().format()
     gf_member.save()
+
+
+def get_existing_basenames_to_ids(oh_member):
+    res = {}
+    for file_info in oh_member.list_files():
+        if 'GoogleFit' in file_info['metadata']['tags']:
+            res[file_info['basename']] = file_info['id']
+    return res

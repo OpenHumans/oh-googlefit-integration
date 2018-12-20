@@ -136,7 +136,7 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
         monthly_gf_data =  GoogleFitData.from_API(gf_access_token, dt1, dt2)
 
         if last_monthly_gf_data and last_monthly_gf_data.last_dt<dt2:
-            monthly_gf_data = monthly_gf_data.merge(last_monthly_gf_data)
+            monthly_gf_data = last_monthly_gf_data.merge(monthly_gf_data)
 
 
         monthly_data_json = monthly_gf_data.to_json()
@@ -170,10 +170,9 @@ def get_latest_googlefit_file_url(oh_access_token):
     download_url = None
     for dfile in member['data']:
         if 'GoogleFit' in dfile['metadata']['tags']:
-            if dfile['metadata'].get('month', '') > latest_month:
+            if dfile['metadata'].get('month', '') >= latest_month:
                 latest_month = dfile['metadata']['month']
                 download_url = dfile['download_url']
-
     return download_url
 
 
