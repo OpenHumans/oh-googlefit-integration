@@ -229,8 +229,9 @@ class GoogleFitData(object):
         #TODO (future) what if data source pairs differ
         for data_type, data_source in self.metadata['data_source_pairs']:
             data1 = self.datasets[data_type][data_source]
-            data2 = self.datasets[data_type][data_source]
+            data2 = other_gf_data.datasets[data_type][data_source]
             new_keys = set(list(data1.keys()) + list(data2.keys()))
+            new_datasets[data_type][data_source] = {}
             for date in new_keys:
                 if date in data1.keys() and date in data2.keys():
                     if len(data1[date])<len(data2[date]):
@@ -242,7 +243,7 @@ class GoogleFitData(object):
                 else:
                     dataset = data2[date]
 
-                new_datasets[data_type][data_source] = dataset
+                new_datasets[data_type][data_source][date] = dataset
 
 
         return GoogleFitData(new_datasets, new_metadata)
