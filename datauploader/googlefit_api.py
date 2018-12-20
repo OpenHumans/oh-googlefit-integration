@@ -113,11 +113,12 @@ def generate_monthly_ranges(first_date, last_date):
 def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
 
-    user_has_data, fn = get_latest_googlefit_file(oh_access_token)
+    download_url = get_latest_googlefit_file_url(oh_access_token)
 
-    if user_has_data:
-        last_monthly_gf_data = GoogleFitData.from_file(fn)
-        start_date = start_of_day(last_monthly_gf_data.end_dt) # start of day to account for partial data in the last day
+    if download_url:
+        existing_data_json = download_to_json(download_url)
+        last_monthly_gf_data = GoogleFitData.from_json(existing_data_json)
+        start_date = start_of_day(last_monthly_gf_data.last_dt) # start of day to account for partial data in the last day
     else:
         last_monthly_gf_data = None
         start_date = find_first_date_with_data(gf_access_token, current_date)
@@ -139,10 +140,10 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
 
         monthly_data_json = monthly_gf_data.to_json()
-        print("Last dt: {}".format(monthly_gf_data.end_dt))
+        print("Last dt: {}".format(monthly_gf_data.last_dt))
         file_name = 'googlefit_{}.json'.format(dt1.strftime('%Y-%m'))
         full_file_name = write_jsonfile_to_tmp_dir(file_name, monthly_data_json)
-        all_gf_data_files.append((full_file_name, dt1.strftime("%Y-m")))
+        all_gf_data_files.append((full_file_name, dt1.strftime("%Y-%m")))
 
 
     print(all_gf_data_files)
@@ -160,15 +161,8 @@ def write_jsonfile_to_tmp_dir(filename, json_data):
     return full_path
 
 
-def get_latest_googlefit_file(oh_access_token):
-    download_url = get_latest_googlefit_file_url(oh_access_token)
-    if download_url:
-            tf_in = tempfile.NamedTemporaryFile(suffix='.json')
-            tf_in.write(requests.get(download_url).content)
-            tf_in.flush()
-            return True, tf_in.name
-    return False, None
-
+def download_to_json(download_url):
+    return json.loads(requests.get(download_url).content)
 
 def get_latest_googlefit_file_url(oh_access_token):
     member = api.exchange_oauth2_member(oh_access_token)
@@ -190,7 +184,7 @@ class GoogleFitData(object):
         self.metadata = metadata
 
     @property
-    def end_dt(self):
+    def last_dt(self):
         return datetime.strptime(self.metadata['last_dt'], "%Y-%m-%d %H:%M:%S")
 
 
@@ -218,14 +212,13 @@ class GoogleFitData(object):
         return GoogleFitData(datasets, metadata)
 
     @classmethod
-    def from_file(self, fn):
-        json_data = json.load(open(fn,'r'))
+    def from_json(self, json_data):
         return GoogleFitData(datasets=json_data['datasets'], metadata=json_data['metadata'])
 
     def merge(self, other_gf_data):
         if other_gf_data is None:
             return self
-        if self.metadata['month'] != other_gf_data['month']:
+        if self.metadata['month'] != other_gf_data.metadata['month']:
             raise Exception('Should merge datasets of the same month')
         new_metadata = {'month': self.metadata['month'],
                         'last_dt': max(self.metadata['last_dt'], other_gf_data.metadata['last_dt']),
@@ -238,10 +231,10 @@ class GoogleFitData(object):
         for data_type, data_source in self.metadata['data_source_pairs']:
             data1 = self.datasets[data_type][data_source]
             data2 = self.datasets[data_type][data_source]
-            new_keys = set(data1.keys() + data2.keys())
+            new_keys = set(list(data1.keys()) + list(data2.keys()))
             for date in new_keys:
                 if date in data1.keys() and date in data2.keys():
-                    if len(data1[date]<len(data2[date])):
+                    if len(data1[date])<len(data2[date]):
                         dataset = data2[date]
                     else:
                         dataset = data1[date]
