@@ -12,7 +12,7 @@ import os
 
 from ohapi import api
 
-from .googlefit_api import get_googlefit_data
+from datauploader.googlefit_api import get_googlefit_data
 
 
 # Set up logging.

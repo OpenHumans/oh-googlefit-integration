@@ -1,10 +1,11 @@
-import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 import json
 import requests
 import tempfile
 from dateutil.rrule import rrule, DAILY
+
+from datauploader.retry import retry
 
 
 from ohapi import api
@@ -38,7 +39,7 @@ def end_of_day(dt):
     return dt.replace(hour=23, minute=59, second=59, microsecond=999999)
 
 
-# TODO: need to retry those
+
 def query_data_sources(access_token):
     headers = {"Content-Type": "application/json;encoding=utf-8",
                "Authorization": "Bearer {}".format(access_token)}
@@ -46,7 +47,7 @@ def query_data_sources(access_token):
     return set([(res['dataSource'][i]['dataType']['name'], res['dataSource'][i]['dataStreamId']) for i in range(len(res['dataSource']))])
 
 
-# TODO: need to retry those!
+@retry(Exception, tries=2)
 def query_data_stream(access_token, aggregate_value, start_dt, end_dt, bucketing=HOURLY, aggregate_name="dataSourceId"):
 
     data = {
