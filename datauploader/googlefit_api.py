@@ -182,6 +182,13 @@ class GoogleFitData(object):
         self.datasets = datasets
         self.metadata = metadata
 
+
+    def __eq__(self, other):
+        return self.datasets == other.datasets and self.metadata == other.metadata
+
+    def __repr__(self):
+        return str(self.metadata) + '\n' + str(self.datasets)
+
     @property
     def last_dt(self):
         return datetime.strptime(self.metadata['last_dt'], "%Y-%m-%d %H:%M:%S")
