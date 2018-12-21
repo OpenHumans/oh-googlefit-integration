@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 import json
@@ -13,6 +14,7 @@ from ohapi import api
 # based on the initial release
 # https://en.wikipedia.org/wiki/Google_Fit
 GOOGLEFIT_DEFAULT_START_DATE = datetime(2014, 10, 1, 0, 0, 0)
+GOOGLEFIT_DEFAULT_START_DATE = datetime(2018, 12, 1, 0, 0, 0)
 GOOGLEFIT_AGGREGATE_URL = "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate"
 GOOGLEFIT_DATASOURCES_URL = "https://www.googleapis.com/fitness/v1/users/me/dataSources"
 
@@ -87,6 +89,8 @@ def find_first_date_with_data(access_token, end_dt):
 
         is_empty = is_empty_aggregate_result(res)
         if is_empty:
+            if i % 50 == 0:
+                print("No data for {}, will look at later dates".format(dt))
             continue
         else:
             return start_of_day(dt)
@@ -265,30 +269,4 @@ class GoogleFitData(object):
             "datasets": self.datasets,
             "metadata": self.metadata
         }
-
-
-if __name__ == "__main__":
-    # temporary, for testing the data
-    import os
-    import google.auth.transport.requests
-    GOOGLEFIT_CLIENT_ID = os.getenv('GOOGLEFIT_CLIENT_ID')
-    GOOGLEFIT_CLIENT_SECRET = os.getenv('GOOGLEFIT_CLIENT_SECRET')
-    GOOGLEFIT_SCOPES = ['https://www.googleapis.com/auth/fitness.activity.read',
-                        'https://www.googleapis.com/auth/fitness.location.read']
-    GOOGLEFIT_TOKEN_URI = "https://www.googleapis.com/oauth2/v3/token"
-
-    import google.oauth2.credentials
-    credentials = google.oauth2.credentials.Credentials(
-            token=os.getenv("GOOGLEFIT_ACCESS_TOKEN"),
-            refresh_token=os.getenv("GOOGLEFIT_REFRESH_TOKEN"),
-            token_uri=GOOGLEFIT_TOKEN_URI,
-            client_id=GOOGLEFIT_CLIENT_ID,
-            client_secret=GOOGLEFIT_CLIENT_SECRET,
-            scopes=GOOGLEFIT_SCOPES,
-        )
-    if credentials.valid:
-        request = google.auth.transport.requests.Request()
-        credentials.refresh(request)
-        access_token = credentials.token
-    get_googlefit_data('', access_token, datetime.utcnow())
 

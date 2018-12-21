@@ -2,6 +2,7 @@
 Asynchronous tasks that update data in Open Humans.
 """
 import logging
+import os
 
 import arrow
 from celery import shared_task
@@ -56,7 +57,8 @@ def fetch_googlefit_data(oh_id):
         gf_member.last_updated = arrow.now().format()
         gf_member.save()
 
-    except:
+    except Exception as e:
+        print("Fetching googlefit data failed: {}".format(e))
         # queue to retry later
         fetch_googlefit_data.apply_async(args=[oh_id], countdown=3600)
 
