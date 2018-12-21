@@ -112,25 +112,16 @@ def generate_monthly_ranges(first_date, last_date):
 
 def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
+    last_monthly_gf_data, start_sync_date = get_last_synced_data(oh_access_token, gf_access_token, current_date)
 
-    download_url = get_latest_googlefit_file_url(oh_access_token)
-
-    if download_url:
-        existing_data_json = download_to_json(download_url)
-        last_monthly_gf_data = GoogleFitData.from_json(existing_data_json)
-        start_date = start_of_day(last_monthly_gf_data.last_dt) # start of day to account for partial data in the last day
-    else:
-        last_monthly_gf_data = None
-        start_date = find_first_date_with_data(gf_access_token, current_date)
-
-    if start_date is None:
+    if start_sync_date is None:
         # no data available
         return
 
     # separate the data into monthly buckets
     all_gf_data_files = []
-    for dt1, dt2 in generate_monthly_ranges(start_date, current_date):
-        if start_date == current_date:
+    for dt1, dt2 in generate_monthly_ranges(start_sync_date, current_date):
+        if start_sync_date == current_date:
             continue
 
         monthly_gf_data =  GoogleFitData.from_API(gf_access_token, dt1, dt2)
@@ -150,6 +141,18 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
     return all_gf_data_files
 
+
+def get_last_synced_data(oh_access_token, gf_access_token, current_date):
+    download_url = get_latest_googlefit_file_url(oh_access_token)
+    if download_url:
+        existing_data_json = download_to_json(download_url)
+        last_monthly_gf_data = GoogleFitData.from_json(existing_data_json)
+        start_date = start_of_day(
+            last_monthly_gf_data.last_dt)  # start of day to account for partial data in the last day
+    else:
+        last_monthly_gf_data = None
+        start_date = find_first_date_with_data(gf_access_token, current_date)
+    return last_monthly_gf_data, start_date
 
 
 def write_jsonfile_to_tmp_dir(filename, json_data):
