@@ -10,3 +10,8 @@ This repo is based on the Open Humans [data demo template project](https://githu
 Run tests with 
 
 ```python -m pytest```
+
+If you want to have breakpoints such as `import ipdb;ipdb.set_trace()` when testing, need to run the tests with:
+
+```python -m pytest -s```
+
