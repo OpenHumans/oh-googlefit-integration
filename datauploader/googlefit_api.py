@@ -13,7 +13,6 @@ from ohapi import api
 # based on the initial release
 # https://en.wikipedia.org/wiki/Google_Fit
 GOOGLEFIT_DEFAULT_START_DATE = datetime(2014, 10, 1, 0, 0, 0)
-GOOGLEFIT_DEFAULT_START_DATE = datetime(2018, 12, 1, 0, 0, 0)
 GOOGLEFIT_AGGREGATE_URL = "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate"
 GOOGLEFIT_DATASOURCES_URL = "https://www.googleapis.com/fitness/v1/users/me/dataSources"
 
@@ -26,6 +25,7 @@ epoch = datetime.utcfromtimestamp(0)
 HOURLY = 3600000
 MINUTELY = 60000
 PER_SECOND = 1000
+DEFAULT_BUCKETING = MINUTELY
 
 def unix_time_millis(dt):
     return int((dt - epoch).total_seconds() * 1000.0)
@@ -48,7 +48,7 @@ def query_data_sources(access_token):
 
 
 @retry(Exception, tries=2)
-def query_data_stream(access_token, aggregate_value, start_dt, end_dt, bucketing=HOURLY, aggregate_name="dataSourceId"):
+def query_data_stream(access_token, aggregate_value, start_dt, end_dt, bucketing=DEFAULT_BUCKETING, aggregate_name="dataSourceId"):
 
     data = {
         "aggregateBy": [
