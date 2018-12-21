@@ -36,7 +36,7 @@
         {%endif%}
         <br/>
         <p>You want do remove your current GoogleFit account and maybe replace with
-          with a different one? Click below to remove your current GoogleFit account</p>
+          with a different one? Click below to remove your current GoogleFit account. Please also remove the authorization in your <a href="https://myaccount.google.com/permissions">Google Account Permissions</a>.</p>
         <form action="{% url 'remove_googlefit' %}" method="post">
           {% csrf_token %}
           <input type="submit"
