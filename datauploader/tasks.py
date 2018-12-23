@@ -35,6 +35,7 @@ def fetch_googlefit_data(oh_id):
     '''
     Fetches all of the googlefit data for a given user
     '''
+    print("Started googlefit update task")
     try:
         current_dt = datetime.utcnow()
         oh_member = OpenHumansMember.objects.get(oh_id=oh_id)
