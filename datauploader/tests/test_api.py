@@ -1,7 +1,30 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+
+import datauploader.helpers
 from datauploader import googlefit_api as API
 
 from doubles import expect, allow
+
+
+def should_find_correct_first_date_with_data(monkeypatch):
+
+    expected_start_dt = datetime(2017, 2, 3, 0 , 0, 0)
+    expected_start_dt_month = datetime(2017, 2, 1, 0 , 0, 0)
+    # mock the behavior of calling query_data_stream to get the first date with data
+    def mock_query_data_stream(access_token, aggregate_value, start_dt, end_dt, **kwargs):
+        if start_dt == expected_start_dt and start_dt.date() == end_dt.date():
+            return {'bucket': [{'dataset':[{'point':'a point'}]}]}
+        elif datauploader.helpers.start_of_month(start_dt) == expected_start_dt_month and start_dt.date() != end_dt.date():
+            return {'bucket': [{'dataset':[{'point':'a point'}]}]}
+        else:
+            return {}
+
+    with monkeypatch.context() as m:
+
+        m.setattr(API, 'query_data_stream', mock_query_data_stream)
+        assert(API.find_first_date_with_data('', expected_start_dt + timedelta(days=10)) == expected_start_dt)
+        assert(API.find_first_date_with_data('', expected_start_dt) == expected_start_dt)
+        assert(API.find_first_date_with_data('', expected_start_dt - timedelta(days=10)) is None)
 
 
 def test_daterange_across_months_should_create_two_files():
@@ -24,11 +47,11 @@ def monthly_ranges_should_work_for_long_range_spanning_many_months():
     start_dt = datetime(2017, 9, 2, 4, 4, 2)
     end_dt = datetime(2018, 1, 5, 4, 4, 6)
     ranges = list(API.generate_monthly_ranges(start_dt, end_dt))
-    expected = [(start_dt, API.end_of_day(datetime(2017, 9, 30))),
-                (API.start_of_day(datetime(2017, 10, 1)), API.end_of_day(datetime(2017, 10, 31))),
-                (API.start_of_day(datetime(2017, 11, 1)), API.end_of_day(datetime(2017, 11, 30))),
-                (API.start_of_day(datetime(2017, 12, 1)), API.end_of_day(datetime(2017, 12, 31))),
-                (API.start_of_day(datetime(2018, 1, 1)), end_dt)
+    expected = [(start_dt, datauploader.helpers.end_of_day(datetime(2017, 9, 30))),
+                (datauploader.helpers.start_of_day(datetime(2017, 10, 1)), datauploader.helpers.end_of_day(datetime(2017, 10, 31))),
+                (datauploader.helpers.start_of_day(datetime(2017, 11, 1)), datauploader.helpers.end_of_day(datetime(2017, 11, 30))),
+                (datauploader.helpers.start_of_day(datetime(2017, 12, 1)), datauploader.helpers.end_of_day(datetime(2017, 12, 31))),
+                (datauploader.helpers.start_of_day(datetime(2018, 1, 1)), end_dt)
                 ]
 
     assert (ranges == expected)
@@ -54,9 +77,9 @@ def monthly_ranges_should_work_for_leap_years():
     start_dt = datetime(2016, 1, 2, 4, 4, 2)
     end_dt = datetime(2016, 3, 5, 4, 4, 6)
     ranges = list(API.generate_monthly_ranges(start_dt, end_dt))
-    expected = [(start_dt, API.end_of_day(datetime(2016, 1, 31))),
-                (API.start_of_day(datetime(2016, 2, 1)), API.end_of_day(datetime(2016, 2, 29))),
-                (API.start_of_day(datetime(2016, 3, 1)), end_dt)
+    expected = [(start_dt, datauploader.helpers.end_of_day(datetime(2016, 1, 31))),
+                (datauploader.helpers.start_of_day(datetime(2016, 2, 1)), datauploader.helpers.end_of_day(datetime(2016, 2, 29))),
+                (datauploader.helpers.start_of_day(datetime(2016, 3, 1)), end_dt)
                 ]
 
     assert (ranges == expected)

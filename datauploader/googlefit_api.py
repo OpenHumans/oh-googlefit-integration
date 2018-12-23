@@ -1,20 +1,18 @@
-import os
+import json
 from collections import defaultdict
 from datetime import datetime, timedelta
-import json
+
 import requests
-import tempfile
-from dateutil.rrule import rrule, DAILY
-
-from datauploader.retry import retry
-
-
+from dateutil.rrule import rrule, DAILY, MONTHLY
 from ohapi import api
+
+from datauploader.helpers import unix_time_millis, start_of_day, end_of_day, end_of_month, start_of_month, \
+    write_jsonfile_to_tmp_dir, download_to_json
+from datauploader.retry import retry
 
 # based on the initial release
 # https://en.wikipedia.org/wiki/Google_Fit
 GOOGLEFIT_DEFAULT_START_DATE = datetime(2014, 10, 1, 0, 0, 0)
-GOOGLEFIT_DEFAULT_START_DATE = datetime(2018, 12, 1, 0, 0, 0)
 GOOGLEFIT_AGGREGATE_URL = "https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate"
 GOOGLEFIT_DATASOURCES_URL = "https://www.googleapis.com/fitness/v1/users/me/dataSources"
 
@@ -23,23 +21,10 @@ GOOGLEFIT_SYNCED_DATATYPES = ('com.google.active_minutes',
                               'com.google.distance.delta',
                               'com.google.step_count.delta')
 
-epoch = datetime.utcfromtimestamp(0)
 HOURLY = 3600000
 MINUTELY = 60000
 PER_SECOND = 1000
 DEFAULT_BUCKETING = MINUTELY
-
-def unix_time_millis(dt):
-    return int((dt - epoch).total_seconds() * 1000.0)
-
-
-def start_of_day(dt):
-    return dt.replace(hour=0, minute=0, second=0, microsecond=0)
-
-
-def end_of_day(dt):
-    return dt.replace(hour=23, minute=59, second=59, microsecond=999999)
-
 
 
 def query_data_sources(access_token):
@@ -71,7 +56,7 @@ def query_data_stream(access_token, aggregate_value, start_dt, end_dt, bucketing
 
 
 def is_empty_aggregate_result(result):
-    for bucket in result['bucket']:
+    for bucket in result.get('bucket', {}):
         ds = bucket['dataset']
         for data in ds:
             if data['point'] != []:
@@ -79,9 +64,27 @@ def is_empty_aggregate_result(result):
     return True
 
 
-def find_first_date_with_data(access_token, end_dt):
+def find_first_month_with_data(access_token, end_dt):
 
     start_dt = GOOGLEFIT_DEFAULT_START_DATE
+
+    for i, dt in enumerate(rrule(MONTHLY, dtstart=start_dt, until=end_dt)):
+        res = query_data_stream(access_token, 'com.google.active_minutes', start_of_day(dt), end_of_day(dt + timedelta(days=32)),
+                                bucketing=12*HOURLY, aggregate_name="dataTypeName")
+
+        is_empty = is_empty_aggregate_result(res)
+        if is_empty:
+            print("No data for {}, will look at later dates".format(dt))
+            continue
+        else:
+            return start_of_month(dt)
+
+    return None
+
+
+def find_first_date_with_data(access_token, end_dt):
+
+    start_dt = find_first_month_with_data(access_token, end_dt)
 
     for i, dt in enumerate(rrule(DAILY, dtstart=start_dt, until=end_dt)):
         res = query_data_stream(access_token, 'com.google.active_minutes', start_of_day(dt), end_of_day(dt),
@@ -89,17 +92,11 @@ def find_first_date_with_data(access_token, end_dt):
 
         is_empty = is_empty_aggregate_result(res)
         if is_empty:
-            if i % 50 == 0:
-                print("No data for {}, will look at later dates".format(dt))
-            continue
+            print("No data for {}, will look at later dates".format(dt))
         else:
             return start_of_day(dt)
 
     return None
-
-def end_of_month(dt):
-    next_month = dt.replace(day=28) + timedelta(days=4)
-    return end_of_day(next_month - timedelta(days=next_month.day))
 
 
 def generate_monthly_ranges(first_date, last_date):
@@ -159,18 +156,6 @@ def get_last_synced_data(oh_access_token, gf_access_token, current_date):
         start_date = find_first_date_with_data(gf_access_token, current_date)
     return last_monthly_gf_data, start_date
 
-
-def write_jsonfile_to_tmp_dir(filename, json_data):
-    tmp_dir = tempfile.mkdtemp()
-    full_path = os.path.join(tmp_dir, filename)
-    with open(full_path, 'w') as json_file:
-        json_file.write(json.dumps(json_data))
-        json_file.flush()
-    return full_path
-
-
-def download_to_json(download_url):
-    return json.loads(requests.get(download_url).content)
 
 def get_latest_googlefit_file_url(oh_access_token):
     member = api.exchange_oauth2_member(oh_access_token)
