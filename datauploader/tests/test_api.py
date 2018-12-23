@@ -1,6 +1,24 @@
 from datetime import datetime
 from datauploader import googlefit_api as API
 
+from doubles import expect, allow
+
+
+def test_daterange_across_months_should_create_two_files():
+    start_sync_dt = datetime(2018, 3, 26, 12, 5, 1)
+    curr_dt = datetime(2018, 4, 1, 0, 0, 1)
+    number_of_days = 7
+    data_type = 'com.google.step_count.delta'
+    data_source = 'derived:com.google.step_count.delta:com.google.android.gms:merge_step_deltas'
+
+    expect(API).get_last_synced_data.and_return((None, start_sync_dt))
+    expect(API).query_data_sources.and_return({(data_type, data_source)})
+    expect(API).query_data_stream.and_return({}).exactly(number_of_days).times
+    res = API.get_googlefit_data('', '', curr_dt)
+    assert len(res) == 2
+    assert res[0][1] == '2018-03'
+    assert res[1][1] == '2018-04'
+
 
 def monthly_ranges_should_work_for_long_range_spanning_many_months():
     start_dt = datetime(2017, 9, 2, 4, 4, 2)

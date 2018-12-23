@@ -213,7 +213,7 @@ class GoogleFitData(object):
                 continue
             monthly_dataset = {}
             for i, dt in enumerate(rrule(DAILY, dtstart=start_dt, until=end_dt)):
-                print("Getting {} for {}".format(data_stream_id, dt))
+                print("Getting {} for {}".format(data_stream_id, start_of_day(dt)))
                 res = query_data_stream(access_token, data_stream_id, start_of_day(dt), end_of_day(dt))
                 monthly_dataset[dt.strftime("%Y-%m-%d")] = res
 
