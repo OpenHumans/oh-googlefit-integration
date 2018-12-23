@@ -249,10 +249,10 @@ class GoogleFitData(object):
             new_datasets[data_type][data_source] = {}
             for date in new_keys:
                 if date in data1.keys() and date in data2.keys():
-                    if len(data1[date])<len(data2[date]):
-                        dataset = data2[date]
-                    else:
+                    if self.metadata['last_dt'] > other_gf_data.metadata['last_dt']:
                         dataset = data1[date]
+                    else:
+                        dataset = data2[date]
                 elif date in data1.keys():
                     dataset = data1[date]
                 else:

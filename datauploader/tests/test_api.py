@@ -75,7 +75,7 @@ def merging_datasets_with_daily_overlap_should_work():
     pairs = [('steps', 'from_gps')]
     data_types = ['steps']
 
-    dataset1 = {'steps': {'from_gps': {'2017-10-01': ['data1'], '2017-10-09': ['data2']}}}
+    dataset1 = {'steps': {'from_gps': {'2017-10-01': ['data1'], '2017-10-09': ['data2', []]}}}
 
     dataset2 = {'steps': {'from_gps': {'2017-10-09': ['data2', 'data3'],
                                        '2017-10-11': ['data4']}}}
