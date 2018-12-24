@@ -10,8 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
+import django_heroku
 import os
-import dj_database_url
 import logging
 
 logger = logging.getLogger(__name__)
@@ -68,12 +68,7 @@ GOOGLEFIT_CLIENT_CONFIG = {"web":{"client_id": GOOGLEFIT_CLIENT_ID,
 
 
 
-if REMOTE is True:
-    from urllib.parse import urlparse
-    url_object = urlparse(os.getenv('REDIS_URL'))
-    logger.info('Connecting to redis at %s:%s',
-        url_object.hostname,
-        url_object.port)
+REDIS_URL = os.getenv('REDIS_URL', 'redis://')
 
 if REMOTE is False:
     GOOGLEFIT_CALLBACK_URL = 'http://127.0.0.1:5000/complete/googlefit'
@@ -138,9 +133,6 @@ DATABASES = {
     }
 }
 
-if REMOTE:
-    db_from_env = dj_database_url.config(conn_max_age=500)
-    DATABASES['default'].update(db_from_env)
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -242,3 +234,6 @@ STATICFILES_DIRS = (
 )
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+django_heroku.settings(locals())
