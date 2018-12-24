@@ -59,7 +59,9 @@ def fetch_googlefit_data(oh_id):
         gf_member.save()
 
     except Exception as e:
+        import traceback
         print("Fetching googlefit data failed: {}".format(e))
+        print(traceback.format_exc())
         # queue to retry later
         fetch_googlefit_data.apply_async(args=[oh_id], countdown=3600)
 
