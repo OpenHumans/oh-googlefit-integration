@@ -8,7 +8,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from django.urls import reverse
 from datauploader.tasks import fetch_googlefit_data
-from datauploader.googlefit_api import get_latest_googlefit_file_url
+from datauploader.googlefit_api import get_latest_googlefit_file_url, get_latest_googlefit_file_updated_dt
 from ohapi import api
 from openhumans.models import OpenHumansMember
 from .models import GoogleFitMember
@@ -44,6 +44,7 @@ def dashboard(request):
         if hasattr(request.user.openhumansmember, 'googlefit_member'):
             googlefit_member = request.user.openhumansmember.googlefit_member
             download_file = get_latest_googlefit_file_url(request.user.openhumansmember.get_access_token())
+            last_updated = get_latest_googlefit_file_updated_dt(request.user.openhumansmember.get_access_token())
             if download_file == 'error':
                 logout(request)
                 return redirect("/")
@@ -59,6 +60,7 @@ def dashboard(request):
             'openhumansmember': request.user.openhumansmember,
             'googlefit_member': googlefit_member,
             'download_file': download_file,
+            'timedelta_since_update': arrow.get(last_updated).humanize(granularity='minute'),
             'connect_url': auth_url,
             'allow_update': allow_update
         }

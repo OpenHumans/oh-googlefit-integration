@@ -55,8 +55,11 @@
           class="btn btn-success"
           href="{{download_file}}"
           >
-          Download <i>GoogleFit</i> Data
+          Download <i>GoogleFit</i> Data.
         </a>
+        <p>
+          Last updated: {{timedelta_since_update}}
+        </p>
         {%else%}
         <a
           class="btn btn-default disabled"
