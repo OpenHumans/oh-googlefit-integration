@@ -177,7 +177,16 @@ class GoogleFitData(object):
 
 
     def __eq__(self, other):
-        return self.datasets == other.datasets and self.metadata == other.metadata
+
+        metadata_equal = (self.metadata.keys() == other.metadata.keys())
+
+        for k in self.metadata:
+            if k == 'data_source_pairs' or k == 'data_types':
+                metadata_equal = metadata_equal and (set(self.metadata[k]) == set(other.metadata[k]))
+            else:
+                metadata_equal = metadata_equal and (self.metadata[k] == other.metadata[k])
+
+        return metadata_equal and self.datasets == other.datasets
 
     def __repr__(self):
         return str(self.metadata) + '\n' + str(self.datasets)
@@ -214,22 +223,29 @@ class GoogleFitData(object):
     def from_json(self, json_data):
         return GoogleFitData(datasets=json_data['datasets'], metadata=json_data['metadata'])
 
+
+    def get_dataset_for_type_and_source(self, type, source):
+        return self.datasets.get(type, {}).get(source, {})
+
     def merge(self, other_gf_data):
         if other_gf_data is None:
             return self
         if self.metadata['month'] != other_gf_data.metadata['month']:
             raise Exception('Should merge datasets of the same month')
+
+        merged_dsp = list(set(self.metadata['data_source_pairs']) | set(other_gf_data.metadata['data_source_pairs']))
+        merged_dt = list(set(self.metadata['data_types']) | set(other_gf_data.metadata['data_types']))
+
         new_metadata = {'month': self.metadata['month'],
                         'last_dt': max(self.metadata['last_dt'], other_gf_data.metadata['last_dt']),
-                        'data_source_pairs': self.metadata['data_source_pairs'],
-                        'data_types': self.metadata['data_types']}
+                        'data_source_pairs': merged_dsp,
+                        'data_types': merged_dt}
 
         #merge the datasets
         new_datasets = defaultdict(lambda :{})
-        #TODO (future) what if data source pairs differ
-        for data_type, data_source in self.metadata['data_source_pairs']:
-            data1 = self.datasets[data_type][data_source]
-            data2 = other_gf_data.datasets[data_type][data_source]
+        for data_type, data_source in merged_dsp:
+            data1 = self.get_dataset_for_type_and_source(data_type, data_source)
+            data2 = other_gf_data.get_dataset_for_type_and_source(data_type, data_source)
             new_keys = set(list(data1.keys()) + list(data2.keys()))
             new_datasets[data_type][data_source] = {}
             for date in new_keys:
@@ -240,8 +256,10 @@ class GoogleFitData(object):
                         dataset = data2[date]
                 elif date in data1.keys():
                     dataset = data1[date]
-                else:
+                elif date in data2.keys():
                     dataset = data2[date]
+                else:
+                    continue
 
                 new_datasets[data_type][data_source][date] = dataset
 

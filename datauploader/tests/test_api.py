@@ -7,24 +7,25 @@ from doubles import expect, allow
 
 
 def should_find_correct_first_date_with_data(monkeypatch):
+    expected_start_dt = datetime(2017, 2, 3, 0, 0, 0)
+    expected_start_dt_month = datetime(2017, 2, 1, 0, 0, 0)
 
-    expected_start_dt = datetime(2017, 2, 3, 0 , 0, 0)
-    expected_start_dt_month = datetime(2017, 2, 1, 0 , 0, 0)
     # mock the behavior of calling query_data_stream to get the first date with data
     def mock_query_data_stream(access_token, aggregate_value, start_dt, end_dt, **kwargs):
         if start_dt == expected_start_dt and start_dt.date() == end_dt.date():
-            return {'bucket': [{'dataset':[{'point':'a point'}]}]}
-        elif datauploader.helpers.start_of_month(start_dt) == expected_start_dt_month and start_dt.date() != end_dt.date():
-            return {'bucket': [{'dataset':[{'point':'a point'}]}]}
+            return {'bucket': [{'dataset': [{'point': 'a point'}]}]}
+        elif datauploader.helpers.start_of_month(
+                start_dt) == expected_start_dt_month and start_dt.date() != end_dt.date():
+            return {'bucket': [{'dataset': [{'point': 'a point'}]}]}
         else:
             return {}
 
     with monkeypatch.context() as m:
 
         m.setattr(API, 'query_data_stream', mock_query_data_stream)
-        assert(API.find_first_date_with_data('', expected_start_dt + timedelta(days=10)) == expected_start_dt)
-        assert(API.find_first_date_with_data('', expected_start_dt) == expected_start_dt)
-        assert(API.find_first_date_with_data('', expected_start_dt - timedelta(days=10)) is None)
+        assert (API.find_first_date_with_data('', expected_start_dt + timedelta(days=10)) == expected_start_dt)
+        assert (API.find_first_date_with_data('', expected_start_dt) == expected_start_dt)
+        assert (API.find_first_date_with_data('', expected_start_dt - timedelta(days=10)) is None)
 
 
 def test_daterange_across_months_should_create_two_files():
@@ -48,9 +49,12 @@ def monthly_ranges_should_work_for_long_range_spanning_many_months():
     end_dt = datetime(2018, 1, 5, 4, 4, 6)
     ranges = list(API.generate_monthly_ranges(start_dt, end_dt))
     expected = [(start_dt, datauploader.helpers.end_of_day(datetime(2017, 9, 30))),
-                (datauploader.helpers.start_of_day(datetime(2017, 10, 1)), datauploader.helpers.end_of_day(datetime(2017, 10, 31))),
-                (datauploader.helpers.start_of_day(datetime(2017, 11, 1)), datauploader.helpers.end_of_day(datetime(2017, 11, 30))),
-                (datauploader.helpers.start_of_day(datetime(2017, 12, 1)), datauploader.helpers.end_of_day(datetime(2017, 12, 31))),
+                (datauploader.helpers.start_of_day(datetime(2017, 10, 1)),
+                 datauploader.helpers.end_of_day(datetime(2017, 10, 31))),
+                (datauploader.helpers.start_of_day(datetime(2017, 11, 1)),
+                 datauploader.helpers.end_of_day(datetime(2017, 11, 30))),
+                (datauploader.helpers.start_of_day(datetime(2017, 12, 1)),
+                 datauploader.helpers.end_of_day(datetime(2017, 12, 31))),
                 (datauploader.helpers.start_of_day(datetime(2018, 1, 1)), end_dt)
                 ]
 
@@ -78,7 +82,8 @@ def monthly_ranges_should_work_for_leap_years():
     end_dt = datetime(2016, 3, 5, 4, 4, 6)
     ranges = list(API.generate_monthly_ranges(start_dt, end_dt))
     expected = [(start_dt, datauploader.helpers.end_of_day(datetime(2016, 1, 31))),
-                (datauploader.helpers.start_of_day(datetime(2016, 2, 1)), datauploader.helpers.end_of_day(datetime(2016, 2, 29))),
+                (datauploader.helpers.start_of_day(datetime(2016, 2, 1)),
+                 datauploader.helpers.end_of_day(datetime(2016, 2, 29))),
                 (datauploader.helpers.start_of_day(datetime(2016, 3, 1)), end_dt)
                 ]
 
@@ -138,3 +143,71 @@ def merging_datasets_with_daily_overlap_should_work():
 
     assert (gf1.merge(gf2) == expected)
     assert (gf2.merge(gf1) == expected)
+
+
+def merging_datasets_with_daily_overlap_and_added_sources_should_work():
+    pairs = [('steps', 'from_gps'), ('steps', 'from_foo')]
+    data_types = ['steps']
+
+    dataset1 = {'steps': {'from_gps': {'2017-10-01': ['data1'], '2017-10-09': ['data2', []]}}}
+
+    dataset2 = {'steps': {'from_gps': {'2017-10-09': ['data2', 'data3'],
+                                       '2017-10-11': ['data4']},
+                'from_foo': {'2017-10-09': ['data2', 'data3'],
+                              '2017-10-11': ['data4']}
+                 }}
+
+    dataset_merged = {'steps': {'from_gps': {'2017-10-01': ['data1'], '2017-10-09': ['data2', 'data3'],
+                                             '2017-10-11': ['data4']}, 'from_foo': {'2017-10-09': ['data2', 'data3'],
+                              '2017-10-11': ['data4']}}}
+
+    gf1 = API.GoogleFitData(dataset1,
+                            {'month': '10-2017', 'last_dt': '2017-10-09 12:30:41', 'data_source_pairs': pairs,
+                             'data_types': data_types})
+    gf2 = API.GoogleFitData(dataset2,
+                            {'month': '10-2017', 'last_dt': '2017-10-12 12:30:41', 'data_source_pairs': pairs,
+                             'data_types': data_types})
+
+    expected = API.GoogleFitData(dataset_merged,
+                                 {'month': '10-2017', 'last_dt': '2017-10-12 12:30:41', 'data_source_pairs': pairs,
+                                  'data_types': data_types})
+
+    assert (gf1.merge(gf2) == expected)
+    assert (gf2.merge(gf1) == expected)
+
+
+
+def merging_datasets_with_daily_overlap_and_removed_sources_should_work():
+    pairs = [('steps', 'from_gps'), ('steps', 'from_foo')]
+    data_types = ['steps']
+
+
+    dataset1 = {'steps': {'from_gps': {'2017-10-09': ['data2', 'data3'],
+                                       '2017-10-11': ['data4']},
+                'from_foo': {'2017-10-09': ['data2', 'data3'],
+                              '2017-10-11': ['data4']}
+                 }}
+
+    dataset2 = {'steps': {'from_gps': {'2017-10-11': ['data2', 'data3'],
+                                       '2017-10-13': ['data4']}
+                 }}
+
+
+    dataset_merged = {'steps': {'from_gps': {'2017-10-09': ['data2', 'data3'],
+                                             '2017-10-11': ['data2', 'data3'], '2017-10-13': ['data4']}, 'from_foo': {'2017-10-09': ['data2', 'data3'],
+                              '2017-10-11': ['data4']}}}
+
+    gf1 = API.GoogleFitData(dataset1,
+                            {'month': '10-2017', 'last_dt': '2017-10-09 12:30:41', 'data_source_pairs': pairs,
+                             'data_types': data_types})
+    gf2 = API.GoogleFitData(dataset2,
+                            {'month': '10-2017', 'last_dt': '2017-10-13 12:30:41', 'data_source_pairs': pairs,
+                             'data_types': data_types})
+
+    expected = API.GoogleFitData(dataset_merged,
+                                 {'month': '10-2017', 'last_dt': '2017-10-13 12:30:41', 'data_source_pairs': pairs,
+                                  'data_types': data_types})
+
+    assert (gf1.merge(gf2) == expected)
+    assert (gf2.merge(gf1) == expected)
+
