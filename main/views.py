@@ -110,16 +110,15 @@ def complete_googlefit(request):
     googlefit_member.user_id = request.user.openhumansmember.oh_id
     googlefit_member.save()
 
-    # TODO: Fetch user's data from GoogleFit (update the data if it already exists)
     alldata = fetch_googlefit_data.delay(request.user.openhumansmember.oh_id)
 
-    if googlefit_member:
+    if googlefit_member and googlefit_member.refresh_token:
         messages.info(request, "Your GoogleFit account has been connected, and your data has been queued to be fetched from GoogleFit")
         return redirect('/dashboard')
 
     logger.debug('Invalid code exchange. User returned to starting page.')
     messages.info(request, ("Something went wrong, please try connecting your "
-                            "GoogleFit account again"))
+                            "GoogleFit account again. If you have an existing connection, please go to https://myaccount.google.com/permissions to remove it and try again."))
     return redirect('/dashboard')
 
 
