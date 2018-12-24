@@ -168,6 +168,21 @@ def get_latest_googlefit_file_url(oh_access_token):
                 download_url = dfile['download_url']
     return download_url
 
+def get_latest_googlefit_file_updated_dt(oh_access_token):
+    member = api.exchange_oauth2_member(oh_access_token)
+    latest_month = GOOGLEFIT_DEFAULT_START_DATE.strftime("%Y-%m")
+    last_updated = None
+    for dfile in member['data']:
+        if 'GoogleFit' in dfile['metadata']['tags']:
+            if dfile['metadata'].get('month', '') >= latest_month:
+                latest_month = dfile['metadata']['month']
+                last_updated = dfile['metadata']['updated_at']
+    if last_updated:
+        return datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S.%f")
+    else:
+        return None
+
+
 
 class GoogleFitData(object):
 
