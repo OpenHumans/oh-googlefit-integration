@@ -221,7 +221,10 @@ class GoogleFitData(object):
 
     @classmethod
     def from_json(self, json_data):
-        return GoogleFitData(datasets=json_data['datasets'], metadata=json_data['metadata'])
+        metadata = json_data['metadata']
+        # turn into tuples
+        metadata['data_source_pairs'] = [(pair[0],pair[1]) for pair in json_data['metadata']['data_source_pairs']]
+        return GoogleFitData(datasets=json_data['datasets'], metadata=metadata)
 
 
     def get_dataset_for_type_and_source(self, type, source):
