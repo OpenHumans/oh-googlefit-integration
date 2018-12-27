@@ -43,7 +43,7 @@ if OPENHUMANS_APP_BASE_URL[-1] == "/":
 OPENHUMANS_LOGIN_REDIRECT_URL='/'
 OPENHUMANS_CLIENT_ID = os.getenv('OPENHUMANS_CLIENT_ID')
 OPENHUMANS_CLIENT_SECRET = os.getenv('OPENHUMANS_CLIENT_SECRET')
-OH_ACTIVITY_PAGE = os.getenv('OH_ACTIVITY_PAGE')
+OH_ACTIVITY_PAGE = 'https://www.openhumans.org/activity/google-fit/'
 OPENHUMANS_OH_BASE_URL = 'https://www.openhumans.org'
 
 OH_API_BASE = OPENHUMANS_OH_BASE_URL + '/api/direct-sharing'
@@ -74,7 +74,7 @@ if REMOTE is False:
     GOOGLEFIT_CALLBACK_URL = 'http://127.0.0.1:5000/complete/googlefit'
 else:
     GOOGLEFIT_CALLBACK_URL =\
-        'http://oh-googlefit-integration.herokuapp.com/complete/googlefit'
+        'http://{}.herokuapp.com/complete/googlefit'.format(HEROKUCONFIG_APP_NAME)
 
 # Application definition
 
