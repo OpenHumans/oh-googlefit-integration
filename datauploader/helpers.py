@@ -40,3 +40,7 @@ def write_jsonfile_to_tmp_dir(filename, json_data):
 
 def download_to_json(download_url):
     return json.loads(requests.get(download_url).content)
+
+
+def remove_empty_buckets(json_data):
+    return json_data
