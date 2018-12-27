@@ -49,7 +49,7 @@ def dashboard(request):
                 logout(request)
                 return redirect("/")
             auth_url = ''
-            allow_update = can_update_data(googlefit_member)
+            allow_update = can_update_data(googlefit_member) or last_updated is None
         else:
             allow_update = False
             last_updated = None
