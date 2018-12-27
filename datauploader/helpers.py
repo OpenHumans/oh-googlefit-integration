@@ -44,6 +44,8 @@ def download_to_json(download_url):
 
 def remove_empty_buckets(json_data):
     """Removes empty buckets in place"""
+    if 'bucket' not in json_data:
+        return json_data
     idxs_to_remove = []
     for i, bucket in enumerate(json_data.get('bucket')):
         dataset = bucket['dataset']

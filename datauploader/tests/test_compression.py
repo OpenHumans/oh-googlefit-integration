@@ -3,6 +3,13 @@ import json
 import datauploader.helpers
 
 
+def test_should_leave_as_is_for_error():
+    error = {'error': 'Christmas is going to the dogs'}
+    # https://www.youtube.com/watch?v=lqUKbP_9lNo
+    res = datauploader.helpers.remove_empty_buckets(error)
+    assert res == error
+
+
 def test_should_remove_empty_buckets():
     uncompressed_json = json.load(open('./datauploader/tests/sample_source.json'))
 
