@@ -137,6 +137,8 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
         file_name = 'googlefit_{}.json'.format(dt1.strftime('%Y-%m'))
         full_file_name = write_jsonfile_to_tmp_dir(file_name, monthly_data_json)
         all_gf_data_files.append((full_file_name, dt1.strftime("%Y-%m")))
+        del monthly_gf_data
+        del monthly_data_json
 
 
     print(all_gf_data_files)
