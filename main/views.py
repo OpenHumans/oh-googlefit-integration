@@ -23,6 +23,7 @@ def index(request):
     """
     Starting page for app.
     """
+    raise Exception('lets see if sentry is working')
     if request.user.is_authenticated:
         return redirect('/dashboard')
 
