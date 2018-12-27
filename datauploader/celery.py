@@ -16,7 +16,9 @@ from celery.schedules import crontab
 
 from django.conf import settings
 
-# from main.models import GoogleFitMember
+from raven.contrib.celery import register_logger_signal, register_signal
+from raven.contrib.django.raven_compat.models import client
+
 
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://')
 
@@ -37,12 +39,6 @@ app.conf.update({
     'CELERY_EVENT_QUEUE_EXPIRES': 60,
 })
 
-# Set up Celery Beat (periodic/timed tasks)
-# Commented out until we are sure of if we want to use celery beat
-# @app.on_after_configure.connect
-# def setup_periodic_tasks(sender, **kwargs):
-#     # Calls test('hello') every 10 seconds.
-#     sender.add_periodic_task(10.0, test.s('hello'), name='add every 10')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.
@@ -50,6 +46,8 @@ app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
-@app.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+register_logger_signal(client)
+register_logger_signal(client)
+register_signal(client)
+register_signal(client, ignore_expected=True)
+
