@@ -64,6 +64,7 @@ def fetch_googlefit_data(oh_id):
         print(traceback.format_exc())
         # queue to retry later
         fetch_googlefit_data.apply_async(args=[oh_id], countdown=3600)
+        raise
 
 
 def get_existing_basenames_to_ids(oh_member):
