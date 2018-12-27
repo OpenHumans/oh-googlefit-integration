@@ -70,12 +70,6 @@ GOOGLEFIT_CLIENT_CONFIG = {"web":{"client_id": GOOGLEFIT_CLIENT_ID,
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://')
 
-if REMOTE is False:
-    GOOGLEFIT_CALLBACK_URL = 'http://127.0.0.1:5000/complete/googlefit'
-else:
-    GOOGLEFIT_CALLBACK_URL =\
-        'http://{}.herokuapp.com/complete/googlefit'.format(HEROKUCONFIG_APP_NAME)
-
 # Application definition
 
 INSTALLED_APPS = [
