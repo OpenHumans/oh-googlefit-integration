@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 arrow = "*"
 celery = "*"
-dj-database-url = "*"
 django = "*"
 django-heroku = "*"
 gunicorn = "*"
