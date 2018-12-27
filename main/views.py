@@ -52,6 +52,7 @@ def dashboard(request):
             allow_update = can_update_data(googlefit_member)
         else:
             allow_update = False
+            last_updated = None
             googlefit_member = ''
             download_file = ''
             auth_url = reverse('authorize_googlefit')
