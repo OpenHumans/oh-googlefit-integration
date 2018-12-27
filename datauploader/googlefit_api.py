@@ -7,7 +7,7 @@ from dateutil.rrule import rrule, DAILY, MONTHLY
 from ohapi import api
 
 from datauploader.helpers import unix_time_millis, start_of_day, end_of_day, end_of_month, start_of_month, \
-    write_jsonfile_to_tmp_dir, download_to_json
+    write_jsonfile_to_tmp_dir, download_to_json, remove_empty_buckets
 from datauploader.retry import retry
 
 # based on the initial release
@@ -226,6 +226,7 @@ class GoogleFitData(object):
             for i, dt in enumerate(rrule(DAILY, dtstart=start_dt, until=end_dt)):
                 print("Getting {} for {}".format(data_stream_id, start_of_day(dt)))
                 res = query_data_stream(access_token, data_stream_id, start_of_day(dt), end_of_day(dt))
+                res = remove_empty_buckets(res)
                 monthly_dataset[dt.strftime("%Y-%m-%d")] = res
 
             datasets[data_type_name][data_stream_id] = monthly_dataset
