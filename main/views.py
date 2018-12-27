@@ -93,7 +93,7 @@ def complete_googlefit(request):
     flow.redirect_uri = request.build_absolute_uri(reverse('complete_googlefit'))
 
 
-    authorization_response = request.get_full_path()
+    authorization_response = settings.APP_BASE_URL + request.get_full_path()
     flow.fetch_token(authorization_response=authorization_response)
 
     credentials = flow.credentials
