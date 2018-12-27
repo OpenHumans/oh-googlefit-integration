@@ -118,7 +118,7 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
 
     if start_sync_date is None:
         # no data available
-        return
+        return []
 
     # separate the data into monthly buckets
     all_gf_data_files = []
