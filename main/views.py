@@ -61,9 +61,10 @@ def dashboard(request):
             'openhumansmember': request.user.openhumansmember,
             'googlefit_member': googlefit_member,
             'download_file': download_file,
-            'timedelta_since_update': arrow.get(last_updated).humanize(granularity='minute'),
+            'timedelta_since_update': arrow.get(last_updated).humanize(granularity='hour'),
             'connect_url': auth_url,
-            'allow_update': allow_update
+            'allow_update': allow_update,
+            'activity_page_url': settings.OH_ACTIVITY_PAGE,
         }
         return render(request, 'main/dashboard.html',
                       context=context)
@@ -119,7 +120,7 @@ def complete_googlefit(request):
         return redirect('/dashboard')
 
     logger.debug('Invalid code exchange. User returned to starting page.')
-    messages.info(request, ("Something went wrong, please try connecting your "
+    messages.warning(request, ("Something went wrong, please try connecting your "
                             "GoogleFit account again. If you have an existing connection, please go to https://myaccount.google.com/permissions to remove it and try again."))
     return redirect('/dashboard')
 
