@@ -129,7 +129,10 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
         monthly_gf_data =  GoogleFitData.from_API(gf_access_token, dt1, dt2)
 
         if last_monthly_gf_data and last_monthly_gf_data.last_dt<dt2:
+            print("merging")
             monthly_gf_data = last_monthly_gf_data.merge(monthly_gf_data)
+            del last_monthly_gf_data
+            last_monthly_gf_data = None
 
 
         monthly_data_json = monthly_gf_data.to_json()
