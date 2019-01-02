@@ -87,6 +87,10 @@ def authorize_googlefit(request):
 
 def complete_googlefit(request):
 
+    if 'googlefit_oauth2_state' not in request.session:
+        messages.warning('Authorization with google did not succeed. Please try again')
+        return redirect('/dashboard')
+
     state = request.session['googlefit_oauth2_state']
     flow = google_auth_oauthlib.flow.Flow.from_client_config(
         settings.GOOGLEFIT_CLIENT_CONFIG, scopes=settings.GOOGLEFIT_SCOPES,
