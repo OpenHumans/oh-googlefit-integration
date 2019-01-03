@@ -31,7 +31,6 @@ def query_data_sources(access_token):
     headers = {"Content-Type": "application/json;encoding=utf-8",
                "Authorization": "Bearer {}".format(access_token)}
     res = requests.get(GOOGLEFIT_DATASOURCES_URL, headers=headers).json()
-    print(res)
     return set([(res['dataSource'][i]['dataType']['name'], res['dataSource'][i]['dataStreamId']) for i in range(len(res['dataSource']))])
 
 
