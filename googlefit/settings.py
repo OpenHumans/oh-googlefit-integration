@@ -26,14 +26,17 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv('DEBUG', '').lower() == 'true' else False
 
-REMOTE = True if os.getenv('REMOTE', '').lower() == 'true' else False
+ON_HEROKU = os.getenv('ON_HEROKU', 'false').lower() == 'true'
+
+if ON_HEROKU:
+    SECURE_SSL_REDIRECT = True
 
 ALLOWED_HOSTS = ['*']
 
 HEROKUCONFIG_APP_NAME = os.getenv('HEROKUCONFIG_APP_NAME', '')
 
 DEFAULT_BASE_URL = ('https://{}.herokuapp.com'.format(HEROKUCONFIG_APP_NAME) if
-                    REMOTE else 'http://127.0.0.1:5000')
+                    ON_HEROKU else 'http://127.0.0.1:5000')
 
 OPENHUMANS_APP_BASE_URL = os.getenv('APP_BASE_URL', DEFAULT_BASE_URL)
 if OPENHUMANS_APP_BASE_URL[-1] == "/":
