@@ -39,6 +39,9 @@ def fetch_googlefit_data(oh_id):
     try:
         current_dt = datetime.utcnow()
         oh_member = OpenHumansMember.objects.get(oh_id=oh_id)
+        if not hasattr(oh_member, 'googlefit_member'):
+            print("No googlefit connection exists for member")
+            return
         gf_member = oh_member.googlefit_member
         oh_access_token = oh_member.get_access_token()
         gf_access_token = gf_member.get_access_token()
