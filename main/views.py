@@ -153,12 +153,14 @@ def update_data(request):
     if request.method == "POST" and request.user.is_authenticated:
         openhumansmember = request.user.openhumansmember
         googlefit_member = openhumansmember.googlefit_member
-        fetch_googlefit_data.delay(openhumansmember.oh_id)
+        last_updated = get_latest_googlefit_file_updated_dt(openhumansmember.get_access_token())
+        send_email = last_updated is None
+        fetch_googlefit_data.delay(openhumansmember.oh_id, send_email=send_email)
         googlefit_member.last_submitted_for_update = arrow.now().format()
         googlefit_member.save()
         messages.info(request,
                       ("An update of your GoogleFit data has been started! "
                        "It can take some minutes before the first data is "
-                       "available. Reload this page in a while to find your "
-                       "data"))
+                       "available. You will receive an e-mail when the process has completed. Alternatively, reload this page in a while to find your "
+                       "data."))
         return redirect('/dashboard')

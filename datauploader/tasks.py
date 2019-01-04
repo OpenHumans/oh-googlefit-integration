@@ -31,7 +31,7 @@ def create_metadata(month):
 
 
 @shared_task
-def fetch_googlefit_data(oh_id):
+def fetch_googlefit_data(oh_id, send_email=False):
     '''
     Fetches all of the googlefit data for a given user
     '''
@@ -61,6 +61,11 @@ def fetch_googlefit_data(oh_id):
         gf_member.last_updated = arrow.now().format()
         gf_member.save()
 
+        if send_email and len(filesmonth) > 0:
+            send_first_success_email(oh_id, oh_access_token)
+        elif send_email and len(filesmonth) == 0:
+            send_first_no_data_email(oh_id, oh_access_token)
+
     except Exception as e:
         import traceback
         print("Fetching googlefit data failed: {}".format(e))
@@ -76,3 +81,14 @@ def get_existing_basenames_to_ids(oh_member):
         if 'GoogleFit' in file_info['metadata']['tags']:
             res[file_info['basename']] = file_info['id']
     return res
+
+
+def send_first_success_email(oh_id, oh_access_token):
+    api.message('[GoogleFit] Data Import: Success', 'Your GoogleFit data was imported successfully to OpenHumans. Go to your dashboard to view: https://googlefit.openhumans.org',
+                oh_access_token, project_member_ids=[oh_id])
+
+
+def send_first_no_data_email(oh_id, oh_access_token):
+    api.message('[GoogleFit] Data Import: No Data', 'No GoogleFit data was found to import. You need to be using the GoogleFit app on your Android device to collect data.',
+                oh_access_token, project_member_ids=[oh_id])
+
