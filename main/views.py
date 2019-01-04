@@ -117,10 +117,10 @@ def complete_googlefit(request):
     googlefit_member.user_id = request.user.openhumansmember.oh_id
     googlefit_member.save()
 
-    alldata = fetch_googlefit_data.delay(request.user.openhumansmember.oh_id)
+    fetch_googlefit_data.delay(request.user.openhumansmember.oh_id, send_email=True)
 
     if googlefit_member and googlefit_member.refresh_token:
-        messages.info(request, "Your GoogleFit account has been connected, and your data has been queued to be fetched from GoogleFit")
+        messages.info(request, "Your GoogleFit account has been connected, and your data has been queued to be fetched from GoogleFit. You will receive an e-mail when the process has completed.")
         return redirect('/dashboard')
 
     logger.debug('Invalid code exchange. User returned to starting page.')
@@ -161,6 +161,6 @@ def update_data(request):
         messages.info(request,
                       ("An update of your GoogleFit data has been started! "
                        "It can take some minutes before the first data is "
-                       "available. You will receive an e-mail when the process has completed. Alternatively, reload this page in a while to find your "
+                       "available. Reload this page in a while to find your "
                        "data."))
         return redirect('/dashboard')
