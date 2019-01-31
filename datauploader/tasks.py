@@ -15,7 +15,7 @@ from ohapi import api
 
 from datauploader.googlefit_api import get_googlefit_data
 
-
+MAX_FILE_BYTES = 256000000 # 256 MB
 # Set up logging.
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,8 @@ def fetch_googlefit_data(oh_id, send_email=False):
         for fn, month in filesmonth:
             api.upload_aws(fn, create_metadata(month),
                                   oh_access_token,
-                                  project_member_id=oh_id)
+                                  project_member_id=oh_id,
+                                  max_bytes=MAX_FILE_BYTES)
             basename = os.path.basename(fn)
             if basename in basenames_to_ids:
                 file_id_to_delete = basenames_to_ids[basename]
