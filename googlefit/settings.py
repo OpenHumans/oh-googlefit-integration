@@ -42,17 +42,11 @@ OPENHUMANS_APP_BASE_URL = os.getenv('APP_BASE_URL', DEFAULT_BASE_URL)
 if OPENHUMANS_APP_BASE_URL[-1] == "/":
     OPENHUMANS_APP_BASE_URL = OPENHUMANS_APP_BASE_URL[:-1]
 
-# Open Humans configuration
-OPENHUMANS_LOGIN_REDIRECT_URL='/'
+# Account and Open Humans configuration
+LOGIN_REDIRECT_URL='/'
+LOGOUT_REDIRECT_URL='/'
 OPENHUMANS_CLIENT_ID = os.getenv('OPENHUMANS_CLIENT_ID')
 OPENHUMANS_CLIENT_SECRET = os.getenv('OPENHUMANS_CLIENT_SECRET')
-OH_ACTIVITY_PAGE = 'https://www.openhumans.org/activity/google-fit/'
-OPENHUMANS_OH_BASE_URL = 'https://www.openhumans.org'
-
-OH_API_BASE = OPENHUMANS_OH_BASE_URL + '/api/direct-sharing'
-OH_DIRECT_UPLOAD = OH_API_BASE + '/project/files/upload/direct/'
-OH_DIRECT_UPLOAD_COMPLETE = OH_API_BASE + '/project/files/upload/complete/'
-OH_DELETE_FILES = OH_API_BASE + '/project/files/delete/'
 
 # GoogleFit configuration
 GOOGLEFIT_CLIENT_ID = os.getenv('GOOGLEFIT_CLIENT_ID')

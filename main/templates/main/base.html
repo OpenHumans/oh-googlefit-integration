@@ -1,59 +1,88 @@
 {% load static %}
+<!doctype html>
 
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="oh-proj-template">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta name="google-site-verification" content="GXopuyBHCq0M8Jbkxb4X4Iqg-jZS-az0SWzN2di_nds" />
-    <meta name="google-site-verification" content="ajjXohcwo0ija6WGTvBIY6P486lUvB3c6bCQfUPVmaM" />
+    <meta name="description" content="Access your Google Fit data with this web app, and archive it in your Open Humans account.">
+    <meta name="author" content="Open Humans Foundation">
+    <link rel="icon" href="https://static.openhumans.org/images/open_humans_favicon.png">
 
-    <title>Open Humans Data Source</title>
+    <title>{% block title %}Google Fit Connection{% endblock title %}</title>
 
-    <!-- Bootstrap via CDN. -->
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Bootstrap core CSS, via CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
     <!-- Open Humans styles -->
-    <link rel="stylesheet" type="text/css" href="https://static.openhumans.org/css/oh-proj-theming.css">
     <link rel="stylesheet" type="text/css" href="https://static.openhumans.org/css/oh-fonts.css">
-    <link rel="shortcut icon" type="image/png" href="https://static.openhumans.org/images/open_humans_favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="https://static.openhumans.org/css/oh-proj-theming.css">
 
-    <!-- Local CSS overrides -->
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
   </head>
 
   <body>
-    {% if messages %}
 
-      {% for message in messages %}
-      <div class="alert alert-info" role="alert">
-      {{ message }}
-      </div>
-      {% endfor %}
+    <header>
+      <nav class="navbar navbar-expand-md navbar-open-humans fixed-top container">
+        <a class="navbar-brand" href="/">
+          <img src="https://static.openhumans.org/images/open-humans-logo-only.png" style="height:32px;padding:5px;">
+          Google Fit Connection</a>
+        <button class="navbar-toggler custom-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon custom-toggler"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto">
+          </ul>
+          <ul class='navbar-nav ml-auto'>
+            {% if request.user.is_authenticated %}
+              {% if request.user.openhumansmember.googlefit_member %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'setup' %}">Setup</a>
+              </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'about' %}">About/FAQ</a>
+            </li>
+            {% if not request.user.is_authenticated %}
+            <a href="{{ oh_auth_url }}" class="btn btn-primary">
+              Log in
+            </a>
+            {% else %}
+            <form class="form-inline mt-2 mt-md-0" action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button class="btn btn-info" type="submit">Log out</button>
+            </form>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>
+    </header>
 
-    {% endif %}
-
-    {% block content %}
-    {% endblock %}
+    <!-- Begin page content -->
+    <main role="main" class="container">
+      {% if messages %}
+        <div class="row">
+          {% for message in messages %}
+          <div{% if message.tags %} class="message {{ message.tags }}"{% endif %}>
+            {{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block main %}
+      <h1 class="mt-5">Heading</h1>
+      <p class="lead">Some example lead test.</p>
+      {% endblock main %}
+    </main>
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <!-- Latest compiled and minified JavaScript via WaxCDN -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <!-- Local JavaScript -->
+    <script src="{% static 'vendor/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="https://unpkg.com/popper.js/dist/umd/popper.min.js"></script>
+    <script src="{% static 'vendor/js/bootstrap.min.js' %}"></script>
   </body>
 </html>

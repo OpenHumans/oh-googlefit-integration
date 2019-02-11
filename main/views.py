@@ -8,7 +8,8 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 from django.urls import reverse
 from datauploader.tasks import fetch_googlefit_data
-from datauploader.googlefit_api import get_latest_googlefit_file_url, get_latest_googlefit_file_updated_dt
+from datauploader.googlefit_api import (get_latest_googlefit_file_url,
+                                        get_latest_googlefit_file_updated_dt)
 from ohapi import api
 from openhumans.models import OpenHumansMember
 from .models import GoogleFitMember
@@ -24,12 +25,42 @@ def index(request):
     Starting page for app.
     """
     if request.user.is_authenticated:
-        return redirect('/dashboard')
+        if hasattr(request.user.openhumansmember, 'googlefit_member'):
+            return redirect('dashboard')
+        else:
+            return redirect('setup')
+    else:
+        context = {'oh_auth_url': OpenHumansMember.get_auth_url()}
+        return render(request, 'main/index.html', context=context)
 
-    context = {'oh_auth_url': OpenHumansMember.get_auth_url(),
-               'oh_proj_page': settings.OH_ACTIVITY_PAGE}
 
-    return render(request, 'main/index.html', context=context)
+def about(request):
+    """
+    Share further details about the project.
+    """
+    return render(request, 'main/about.html')
+
+
+def setup(request):
+    """
+    Set up Google Fit connection.
+    """
+    if not request.user.is_authenticated:
+        return redirect('index')
+    context = {}
+    if not hasattr(request.user.openhumansmember, 'googlefit_member'):
+        context['gf_auth_url'] = reverse('authorize_googlefit')
+    return render(request, 'main/setup.html', context=context)
+
+
+def logout_user(request):
+    """
+    Logout user.
+    """
+    if request.method == 'POST':
+        logout(request)
+    redirect_url = settings.LOGOUT_REDIRECT_URL
+    return redirect(redirect_url)
 
 
 def dashboard(request):
@@ -40,35 +71,40 @@ def dashboard(request):
             return True
         return False
 
-    if request.user.is_authenticated:
-        if hasattr(request.user.openhumansmember, 'googlefit_member'):
-            googlefit_member = request.user.openhumansmember.googlefit_member
-            download_file = get_latest_googlefit_file_url(request.user.openhumansmember.get_access_token())
-            last_updated = get_latest_googlefit_file_updated_dt(request.user.openhumansmember.get_access_token())
-            if download_file == 'error':
-                logout(request)
-                return redirect("/")
-            auth_url = ''
-            allow_update = can_update_data(googlefit_member) or last_updated is None
-        else:
-            allow_update = False
-            last_updated = None
-            googlefit_member = ''
-            download_file = ''
-            auth_url = reverse('authorize_googlefit')
-        
-        context = {
-            'openhumansmember': request.user.openhumansmember,
-            'googlefit_member': googlefit_member,
-            'download_file': download_file,
-            'timedelta_since_update': arrow.get(last_updated).humanize(granularity='hour'),
-            'connect_url': auth_url,
-            'allow_update': allow_update,
-            'activity_page_url': settings.OH_ACTIVITY_PAGE,
-        }
-        return render(request, 'main/dashboard.html',
-                      context=context)
-    return redirect("/")
+    if not request.user.is_authenticated:
+        return redirect('index')
+
+    if not hasattr(request.user.openhumansmember, 'googlefit_member'):
+        return redirect('setup')
+
+    googlefit_member = request.user.openhumansmember.googlefit_member
+
+    ### removed as part of template standardization - MPB 201902
+    # download_file = get_latest_googlefit_file_url(request.user.openhumansmember.get_access_token())
+    # last_updated = get_latest_googlefit_file_updated_dt(request.user.openhumansmember.get_access_token())
+    # if download_file == 'error':
+    #     logout(request)
+    #     return redirect("/")
+
+    try:
+        data_files = request.user.openhumansmember.list_files()
+        data_files.sort(key=lambda x: x['basename'], reverse=True)
+    except Exception:
+        data_files = None
+
+    last_updated = get_latest_googlefit_file_updated_dt(
+        request.user.openhumansmember.get_access_token())
+    allow_update = can_update_data(googlefit_member) or last_updated is None
+    context = {
+        'openhumansmember': request.user.openhumansmember,
+        'googlefit_member': googlefit_member,
+        'data_files': data_files,
+        'timedelta_since_update': arrow.get(last_updated).humanize(
+            granularity='hour'),
+        'allow_update': allow_update,
+    }
+    return render(request, 'main/dashboard.html',
+                    context=context)
 
 
 def authorize_googlefit(request):
@@ -121,12 +157,12 @@ def complete_googlefit(request):
 
     if googlefit_member and googlefit_member.refresh_token:
         messages.info(request, "Your GoogleFit account has been connected, and your data has been queued to be fetched from GoogleFit. You will receive an e-mail when the process has completed.")
-        return redirect('/dashboard')
+        return redirect('dashboard')
 
     logger.debug('Invalid code exchange. User returned to starting page.')
     messages.warning(request, ("Something went wrong, please try connecting your "
                             "GoogleFit account again. If you have an existing connection, please go to https://myaccount.google.com/permissions to remove it and try again."))
-    return redirect('/dashboard')
+    return redirect('dashboard')
 
 
 def remove_googlefit(request):

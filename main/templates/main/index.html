@@ -1,56 +1,35 @@
 {% extends 'main/base.html' %}
 {% load static %}
-{% block content %}
 
-    <div class="container">
-      <h1>GoogleFit Data &rarr; Open Humans</h1>
-      <p class="lead">
-        Use this app to add your GoogleFit data to an
-        <a href="https://www.openhumans.org/">Open Humans</a> account. In order to collect data, you need to have the GoogleFit app installed on your Android device.
-      </p>
-      <p class="lead">
-        Learn more by visiting:<br>
-        <a href="{{ oh_proj_page }}">{{ oh_proj_page }}</a>
-      </p>
-      <h2>How it works</h2>
-      <ol>
-        <li><b>Click the button below</b><br>
-          This takes you to Open Humans.</li>
-        <li><b>Log in or create an Open Humans account</b><br>
-          Upon completion, your googlefit data will be added to this account.</li>
-        <li><b>Authorize this app in Open Humans</b><br>
-          This authorizes us to add data to your account.</li>
-        <li><b>Return to this app</b><br>
-          Come back to the app so we can get your personalized googlefit data.</li>
-        <li><b>Click the "connect GoogleFit" button below</b><br>
-          This will redirect you to GoogleFit to authorize so we can fetch GoogleFit data to add to your account.</li>
-        <li><b>Authorize with GoogleFit<br></b></li>
-        <li><b>Return and the app will add data.</b><br>
-          Demo data should be added to your Open Humans account.
-          You'll be able to access &amp; manage data here:
-          <a href="{{ oh_proj_page }}">{{ oh_proj_page }}</a>
-        </li>
+{% block main %}
 
-        <!-- Eventually show optional instructions, only after completed integration, instructing on how to get Intraday data set up  -->
-        <!-- Create a "Personal" GoogleFit app and enter your client ID/secret
-        If you want access to minute or second level data, you will need Intraday access. If you don't need this granular of access, you can use regular access.</li> -->
-
-      </ol>
-      {% if oh_auth_url %}
-      <a
-        class="btn btn-primary btn-lg"
-        href="{{ oh_auth_url }}"
-        {% else %}
-        class="btn btn-default disabled"
-        {% endif %}
-        >
-        Start with Open Humans authorization
-      </a>
-      {% if not oh_auth_url %}
-      <p class="text-muted"><i>
-        This button is disabled because client_id hasn't been configured.
-      </i></p>
-      {% endif %}
+<div class="jumbotron">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col" style="text-align: center;">
+        <img class="img-fluid oh-cnxn-icon" src="{% static 'img/google-fit-icon.png' %}">
+      </div>
+      <div class="col-md-9 col-lg-10">
+        <h1>Open&nbsp;Humans&nbsp;/ Google&nbsp;Fit Connection</h1>
+        <p>
+          Google Fit is an Android app that collects data about steps, activity, and more.
+          You can use this website to retrieve and store Google Fit data in your Open Humans
+          account.
+        </p>
+      </div>
     </div>
+    <div class="row">
+      <div class="col-md-9 offset-md-3 col-lg-10 offset-lg-2">
 
-{% endblock %}
+        <a href="{{ oh_auth_url }}" class="btn btn-primary">
+          Log in via Open Humans
+        </a>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include 'main/partials/about-1.html' %}
+
+{% endblock main %}
