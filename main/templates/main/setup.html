@@ -1,0 +1,38 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block main %}
+<div class="row">
+  <div class="col-md-9 col-lg-10">
+      <h1 class="mb-3">Set Up: Google Fit</h1>
+      <p>
+      {% if gf_auth_url %}
+      Welcome! To finish set up, you need to authorize
+      <a href="https://www.google.com/fit/">Google Fit</a>
+      to let us access and transfer your data.
+      {% else %}
+      You've authorized
+      <a href="https://www.google.com/fit/">Google Fit</a>.
+      If you want to remove this, use the button below.
+      {% endif %}
+      </p>
+  </div>
+  <div class="col d-none d-md-block" style="text-align: center;">
+    <img class="oh-cnxn-icon" src="{% static 'img/google-fit-icon.png' %}">
+  </div>
+</div>
+<hr>
+{% if gf_auth_url %}
+<a class="btn btn-primary btn-lg" href="{{ gf_auth_url }}">
+  Authorize Google Fit
+</a>
+{% else %}
+<form action="{% url 'remove_googlefit' %}" method="post">
+  {% csrf_token %}
+  <input type="submit"
+    value="Disconnect Google Fit"
+    style="margin-top:6px;"
+    class="btn btn-danger btn-lg">
+</form>
+{% endif %}
+{% endblock main %}

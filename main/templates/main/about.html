@@ -1,0 +1,57 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block main %}
+    <div class="row">
+      <div class="col-md-12">
+        <h1 class="mb-3">About: Open Humans / Google Fit Connection</h2>
+      </div>
+      <div class="col-md-6">
+        <img style="float:right; width:33%; margin:1rem;" src="{% static 'img/google-fit-icon.png' %}">
+        {% include 'main/partials/about-1.html' %}
+      </div>
+      <div class="col-md-6">
+        <h2>Data access &amp; data management</h2>
+        <p>
+          <b>Google Fit data:</b> The Google Fit API gives this project ongoing
+          access to data, which we will collect and store for you in
+          Open Humans in an ongoing manner. This includes: steps and other
+          activity data.
+        </p>
+        <p>
+            Data files created by the app are stored in your Open Humans
+            account and are always visible to you on the
+            <a href="https://www.openhumans.org/activity/google-fit/">project
+            activity page</a>.
+        </p>
+        <p>
+          The Google Fit API also gives us access to data we will not copy into
+          your Open Humans account, including: username and email.
+          Access to this data is unavoidable due to how Google operates,
+          but we won't store it.
+        </p>
+        <p>
+          <b>Other data:</b> This project stores tokens for Open Humans and
+          Google Fit authorizations, but has no further access to your Open Humans
+          account data beyond the data files it stores.
+        </p>
+        <p>
+          <b>Removing this connection:</b> You can visit the
+          <a href="https://www.openhumans.org/activity/google-fit/">project
+            activity page</a> in Open Humans to remove this connection within
+            Open Humans and, optionally, delete associated data files.
+        </p>
+        <h2>Code &amp; deployment</h2>
+        <p>
+          This project website is an
+          <a href="https://github.com/OpenHumans/oh-googlefit-integration">open source Django app</a>,
+          and is deployed using
+          <a href="https://www.heroku.com/">Heroku</a>. It uses our
+          <a href="https://www.openhumans.org/direct-sharing/oauth2-features/">standard APIs</a>
+          to interact with the main platform. That means you could build something
+          like it! We love to support projects created by others – please chat with
+          us in our <a href="http://slackin.openhumans.org">community slack</a>.
+        </p>
+
+
+{% endblock %}

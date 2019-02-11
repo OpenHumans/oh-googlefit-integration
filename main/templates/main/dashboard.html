@@ -1,91 +1,65 @@
 {% extends 'main/base.html' %}
 {% load static %}
-{% block content %}
 
-  <div class="container">
-    <h1>Welcome back to the <i>GoogleFit</i> integration for <i>Open Humans</i></h1>
-    <p class="lead">
-      You can perform basic management tasks from this page.
-    </p>
-    {% if googlefit_member %}
-    <div class="row">
-      <div class="col-md-6">
-        <p>
-        A <i>GoogleFit</i> account is connected to your <i>Open Humans</i>
-        right now. You can trigger an
-        update your <i>GoogleFit</i> data (automatic data updates are done every few days,
-        but you might want to have your latest data right now).
-        </p>
-        {% if allow_update %}
-        <form action="{% url 'update_data' %}" method="post">
-          {% csrf_token %}
-          <input type="submit"
-            value="Update Data"
-            style="margin-top:6px;"
-            class="btn btn-primary">
-        </form>
-        {%else%}
-        <a
-          class="btn btn-default disabled"
-          href="#"
-          >
-          You recently requested data. Please wait 1 hour.
-        </a><br/>
-        <p>Getting the latest data from GoogleFit takes a while and impacts other users too,
-          thus we limit the frequency with which you can request updates.</p>
-        {%endif%}
-        <br/>
-        <p>You want do remove your current GoogleFit account and maybe replace with
-          with a different one? Click below to remove your current GoogleFit account. Please also remove the authorization in your <a href="https://myaccount.google.com/permissions">Google Account Permissions</a>.</p>
-        <form action="{% url 'remove_googlefit' %}" method="post">
-          {% csrf_token %}
-          <input type="submit"
-            value="Disconnect GoogleFit"
-            style="margin-top:6px;"
-            class="btn btn-danger">
-        </form>
-        <p>Please report any issues or suggestions on our <a href="https://github.com/OpenHumans/oh-googlefit-integration/">github</a>.</p>
-
-      </div>
-      <div class="col-md-6">
-        <p>
-          You can download a copy of your <i>GoogleFit</i> data from here.
-        </p>
-        {% if download_file %}
-        <a
-          class="btn btn-success"
-          href="{{download_file}}"
-          >
-          Download <i>GoogleFit</i> Data.
-        </a>
-        <p>
-        Last updated: {{timedelta_since_update}}. This is the latest monthly activity file. See a list of data for all previous months <a href="{{activity_page_url}}">here</a>.
-          </p><p>Now that you've imported your data, it's time to explore it! Take a look at our <a href="https://exploratory.openhumans.org/notebook/25/">GoogleFit exploratory notebook</a> and use it on
-          your own data to see distance plots, your highest activity days per week, and how much you've been hitting the 10,000 steps per day goal.
-        </p>
-        {%else%}
-        <a
-          class="btn btn-default disabled"
-          href="#"
-          >
-          No data available yet.
-        </a>
-        <p>If you have recently connected your GoogleFit account it can take a bit
-          until we have gathered your data. Please come back later.</p>
-        {%endif%}
-      </div>
-    </div>
-      {% else %}
-      <p class="lead">
-        You haven't connected to <i>GoogleFit</i> yet or there was a problem fetching your data. click below to get started.
+{% block main %}
+<div class="row">
+    <div class="col-md-9 col-lg-10">
+      <h1 class="mb-3">Dashboard: Google Fit</h1>
+      <p>
+          Congrats! You've connected Google Fit.
+          Your data will be stored in files within your Open Humans account.
+          Files are listed below, and can also be seen in on
+          <a href="https://www.openhumans.org/activity/google-fit/">this
+          project's activity page</a> in the Open Humans website.
       </p>
-      <a
-        class="btn btn-primary btn-lg"
-        href="{{connect_url}}"
-        >
-        Connect your <i>GoogleFit</i> account
-      </a>
-      {%endif%}
-  </div>
+      <p>
+          Automatic updates are done every few days, your data was last
+          updated: {{ timedelta_since_update }}
+      </p>
+      {% if allow_update %}
+      <div>
+        If you'd like to newer data, you can trigger an update:
+        <form action="{% url 'update_data' %}" method="post" class="form-inline" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm">Update data</button>
+        </form>
+      </div>
+    {% endif %}
+    </div>
+    <div class="col d-none d-md-block" style="text-align: center;">
+        <img class="oh-cnxn-icon" src="{% static 'img/google-fit-icon.png' %}">
+    </div>
+</div>
+<hr>
 
-{% endblock %}
+<h2>Your data</h2>
+
+{% if data_files %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">name</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for data_file in data_files %}
+    <tr>
+      <td>
+        {{ data_file.basename }}
+      </td>
+      <td>
+        <a class="btn btn-primary btn-sm" href="{{ data_file.download_url }}" download>Download</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>
+  No files are yet available. (Have you installed the
+  <a href="https://www.google.com/fit/">Google Fit</a> Android app?)
+</p>
+{% endif %}
+
+{% endblock main %}
