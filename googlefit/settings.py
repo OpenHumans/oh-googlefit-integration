@@ -25,6 +25,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if os.getenv('DEBUG', '').lower() == 'true' else False
+DEBUG_PROPAGATE_EXCEPTIONS = True
 
 ON_HEROKU = os.getenv('ON_HEROKU', 'false').lower() == 'true'
 
