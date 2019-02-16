@@ -14,4 +14,9 @@ force_deploy:
 update_data:
 	@heroku run python manage.py update_data
 
+.PHONY: release
+release:
+	@python manage.py migrate && python manage.py collectstatic --noinput
+
+
 
