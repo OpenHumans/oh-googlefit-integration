@@ -225,7 +225,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+from googlefit.storage import NonStrictCompressedManifestStaticFilesStorage
+
+STATICFILES_STORAGE = 'NonStrictCompressedManifestStaticFilesStorage'
 
 
 django_heroku.settings(locals())
