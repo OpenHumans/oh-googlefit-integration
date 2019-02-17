@@ -16,7 +16,10 @@ update_data:
 
 .PHONY: release
 release:
-	@python manage.py migrate && python manage.py collectstatic --noinput
+	@python manage.py migrate
+	ls /app/static
+	cp -r /app/static/* /app/staticfiles/
+	ls /app/staticfiles/
 
 
 
