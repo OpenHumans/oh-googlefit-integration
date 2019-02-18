@@ -92,7 +92,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'googlefit.urls'
@@ -225,10 +224,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
-
-from googlefit.storage import NonStrictCompressedManifestStaticFilesStorage
-
-STATICFILES_STORAGE = 'NonStrictCompressedManifestStaticFilesStorage'
 
 
 django_heroku.settings(locals())
