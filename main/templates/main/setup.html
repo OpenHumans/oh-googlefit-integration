@@ -22,8 +22,8 @@
 </div>
 <hr>
 {% if gf_auth_url %}
-<a class="btn btn-primary btn-lg" href="{{ gf_auth_url }}">
-  Sign in with Google
+<a href="{{ gf_auth_url }}">
+  <img src="{% static 'img/btn_google_signin_dark_normal_web@2x.png'%}"/>
 </a>
 {% else %}
 <form action="{% url 'remove_googlefit' %}" method="post">
