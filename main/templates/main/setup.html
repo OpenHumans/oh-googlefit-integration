@@ -7,9 +7,8 @@
       <h1 class="mb-3">Set Up: Google Fit</h1>
       <p>
       {% if gf_auth_url %}
-      Welcome! To finish set up, you need to authorize
-      <a href="https://www.google.com/fit/">Google Fit</a>
-      to let us access and transfer your data.
+      Welcome! To finish set up, you need to sign in with Google and authorize
+      us to access and transfer data from <a href="https://www.google.com/fit/">Google Fit</a>.
       {% else %}
       You've authorized
       <a href="https://www.google.com/fit/">Google Fit</a>.
@@ -23,8 +22,8 @@
 </div>
 <hr>
 {% if gf_auth_url %}
-<a class="btn btn-primary btn-lg" href="{{ gf_auth_url }}">
-  Authorize Google Fit
+<a href="{{ gf_auth_url }}">
+  <img width='191' src="{% static 'img/btn_google_signin_dark_normal_web@2x.png'%}"/>
 </a>
 {% else %}
 <form action="{% url 'remove_googlefit' %}" method="post">
