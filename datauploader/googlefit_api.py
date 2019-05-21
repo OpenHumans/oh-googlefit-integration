@@ -25,6 +25,7 @@ HOURLY = 3600000
 MINUTELY = 60000
 PER_SECOND = 1000
 DEFAULT_BUCKETING = MINUTELY
+MAX_MONTHS_AT_A_TIME = 12
 
 
 def query_data_sources(access_token):
@@ -120,6 +121,8 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
         # no data available
         return []
 
+    months = 0
+
     # separate the data into monthly buckets
     all_gf_data_files = []
     for dt1, dt2 in generate_monthly_ranges(start_sync_date, current_date):
@@ -142,6 +145,9 @@ def get_googlefit_data(oh_access_token, gf_access_token, current_date):
         all_gf_data_files.append((full_file_name, dt1.strftime("%Y-%m")))
         del monthly_gf_data
         del monthly_data_json
+        months += 1
+        if months > MAX_MONTHS_AT_A_TIME:
+            break
 
 
     print(all_gf_data_files)
