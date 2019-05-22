@@ -18,7 +18,7 @@
       </p>
       {% if allow_update %}
       <div>
-        If you'd like to newer data, you can trigger an update:
+        If you'd like to fetch newer data, you can trigger an update:
         <form action="{% url 'update_data' %}" method="post" class="form-inline" style="display:inline;">
           {% csrf_token %}
           <button type="submit" class="btn btn-primary btn-sm">Update data</button>
