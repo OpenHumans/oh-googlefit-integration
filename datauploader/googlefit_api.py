@@ -19,7 +19,8 @@ GOOGLEFIT_DATASOURCES_URL = "https://www.googleapis.com/fitness/v1/users/me/data
 GOOGLEFIT_SYNCED_DATATYPES = ('com.google.active_minutes',
                               'com.google.calories.expended',
                               'com.google.distance.delta',
-                              'com.google.step_count.delta')
+                              'com.google.step_count.delta',
+                              'com.google.heart_rate.bpm')
 
 HOURLY = 3600000
 MINUTELY = 60000
