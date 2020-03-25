@@ -53,7 +53,8 @@ OPENHUMANS_CLIENT_SECRET = os.getenv('OPENHUMANS_CLIENT_SECRET')
 GOOGLEFIT_CLIENT_ID = os.getenv('GOOGLEFIT_CLIENT_ID')
 GOOGLEFIT_CLIENT_SECRET = os.getenv('GOOGLEFIT_CLIENT_SECRET')
 GOOGLEFIT_SCOPES = ['https://www.googleapis.com/auth/fitness.activity.read',
-          'https://www.googleapis.com/auth/fitness.location.read']
+          'https://www.googleapis.com/auth/fitness.location.read', 'https://www.googleapis.com/auth/fitness.body.read']
+
 GOOGLEFIT_TOKEN_URI = "https://www.googleapis.com/oauth2/v3/token"
 GOOGLEFIT_PROJECT_ID = os.getenv('GOOGLEFIT_PROJECT_ID')
 
