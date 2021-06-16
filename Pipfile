@@ -26,7 +26,6 @@ google-auth-oauthlib = "*"
 google-auth-httplib2 = "*"
 rsa = "~=4.7"
 pygments = "~=2.7"
-httplib = "~=0.19"
 
 [dev-packages]
 pylint = "*"

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3733388414a38f45b2de3c43eaf6cf3fe0d96cc95f8aeb61957e32447dfca56d"
+            "sha256": "bfa26fc63a9bbe948ee12e60ab19f34fd4ca604c13909e57c63e505fdc19c2e7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -442,6 +442,14 @@
             ],
             "version": "==2.20"
         },
+        "pygments": {
+            "hashes": [
+                "sha256:a18f47b506a429f6f4b9df81bb02beab9ca21d0a5fee38ed15aef65f0545519f",
+                "sha256:d66e804411278594d764fc69ec36ec13d9ae9147193a1740cd34d272ca383b8e"
+            ],
+            "index": "pypi",
+            "version": "==2.9.0"
+        },
         "pyjq": {
             "hashes": [
                 "sha256:43f101d13b01632f6918fbcba0403e99dadb1ae712148007a1e207a5c6e107a7",
@@ -565,7 +573,7 @@
                 "sha256:78f9a9bf4e7be0c5ded4583326e7461e3a3c5aae24073648b4bdfa797d78c9d2",
                 "sha256:9d689e6ca1b3038bc82bf8d23e944b6b6037bc02301a574935b2dd946e0353b9"
             ],
-            "markers": "python_version >= '3.6'",
+            "index": "pypi",
             "version": "==4.7.2"
         },
         "six": {
@@ -910,6 +918,7 @@
                 "sha256:a18f47b506a429f6f4b9df81bb02beab9ca21d0a5fee38ed15aef65f0545519f",
                 "sha256:d66e804411278594d764fc69ec36ec13d9ae9147193a1740cd34d272ca383b8e"
             ],
+            "index": "pypi",
             "version": "==2.9.0"
         },
         "pylint": {
