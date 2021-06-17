@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 arrow = "*"
 celery = "*"
-django = "~=2.2"
+django = "*"
 django-heroku = "*"
 gunicorn = "*"
 "psycopg2" = "*"
@@ -14,7 +14,7 @@ requests = "*"
 python-social-auth = "*"
 raven = "*"
 vcrpy = "*"
-pyyaml = "~=5.4"
+pyyaml = "*"
 redis = "*"
 iptools = "*"
 pyjq = "*"
@@ -24,8 +24,6 @@ google-api-python-client = "*"
 google-auth = "*"
 google-auth-oauthlib = "*"
 google-auth-httplib2 = "*"
-rsa = "~=4.7"
-pygments = "~=2.7"
 
 [dev-packages]
 pylint = "*"
@@ -36,3 +34,4 @@ doubles = "*"
 
 [requires]
 python_version = "3.6"
+
